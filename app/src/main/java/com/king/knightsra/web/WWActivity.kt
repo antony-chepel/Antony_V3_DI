@@ -13,14 +13,11 @@ import android.widget.Toast
 import com.appsflyer.AppsFlyerLib
 import com.google.android.material.snackbar.Snackbar
 import com.king.knightsra.R
+import com.king.knightsra.constans.ConstanceAppClass
 import com.king.knightsra.constans.ConstansUsage.adid
 import com.king.knightsra.constans.ConstansUsage.af_id
-import com.king.knightsra.constans.ConstansUsage.cpOne
 import com.king.knightsra.constans.ConstansUsage.depp
-import com.king.knightsra.constans.ConstansUsage.dpOne
 import com.king.knightsra.constans.ConstansUsage.kiokjjlikjhmkij
-import com.king.knightsra.constans.ConstansUsage.linkAB
-import com.king.knightsra.constans.ConstansUsage.mainId
 import com.king.knightsra.constans.ConstansUsage.naming
 import com.king.knightsra.constans.ConstansUsage.pack
 import com.king.knightsra.constans.ConstansUsage.sub4
@@ -265,9 +262,15 @@ class WWActivity : AppCompatActivity() {
 
         val spoon = getSharedPreferences("SP_WEBVIEW_PREFS", AppCompatActivity.MODE_PRIVATE)
 
-
+       val sharedlink = getSharedPreferences(ConstanceAppClass.link, MODE_PRIVATE)
+        val sharedMainId = getSharedPreferences(ConstanceAppClass.MAIN_ID, MODE_PRIVATE)
+       val  sharedDeep= getSharedPreferences(ConstanceAppClass.DEEPL, MODE_PRIVATE)
+        val sharedNaming= getSharedPreferences(ConstanceAppClass.C1, MODE_PRIVATE)
         val afId = AppsFlyerLib.getInstance().getAppsFlyerUID(this)
-
+        val cpOne:String? = sharedNaming.getString(ConstanceAppClass.C1,"null")
+        val mainId: String? = sharedMainId.getString(ConstanceAppClass.MAIN_ID,"null")
+        val dpOne: String? = sharedDeep.getString(ConstanceAppClass.DEEPL,"null")
+        val linkAB = sharedlink.getString(ConstanceAppClass.link,"null")
 
         AppsFlyerLib.getInstance().setCollectAndroidID(true)
 

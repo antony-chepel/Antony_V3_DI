@@ -2,11 +2,13 @@ package com.king.knightsra
 
 
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.appsflyer.AppsFlyerConversionListener
 import com.appsflyer.AppsFlyerLib
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
@@ -20,7 +22,6 @@ import com.king.knightsra.databinding.ActivityMainBinding
 import com.king.knightsra.game.Game
 import com.king.knightsra.viewmodel.RaptorViewModel
 import com.king.knightsra.web.WWActivity
-import com.orhanobut.hawk.Hawk
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import okhttp3.internal.wait
@@ -39,15 +40,26 @@ class MainActivity : AppCompatActivity() {
     private val baseViewModel: RaptorViewModel by viewModels()
     lateinit var bindMainAct: ActivityMainBinding
 
+    private lateinit var sharedDeep : SharedPreferences
+    private lateinit var sharedNaming : SharedPreferences
+    private lateinit var sharedlink : SharedPreferences
+    private lateinit var sharedAppsCheck : SharedPreferences
+    private lateinit var sharedMainId : SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bindMainAct = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bindMainAct.root)
+        sharedAppsCheck = getSharedPreferences(appsCheck, MODE_PRIVATE)
+        sharedlink = getSharedPreferences(link, MODE_PRIVATE)
+        sharedMainId = getSharedPreferences(MAIN_ID, MODE_PRIVATE)
+        sharedDeep= getSharedPreferences(DEEPL, MODE_PRIVATE)
+        sharedNaming= getSharedPreferences(C1, MODE_PRIVATE)
         lifecycleScope.launch {
             baseViewModel.deePP(this@MainActivity)
             AppsFlyerLib.getInstance()
-                .init(ConstanceAppClass.appsflyer, baseViewModel.conversionDataListener, applicationContext)
+                .init(ConstanceAppClass.appsflyer, conversionDataListener, applicationContext)
             AppsFlyerLib.getInstance().start(this@MainActivity)
         }
         networkJob()
@@ -59,8 +71,28 @@ class MainActivity : AppCompatActivity() {
         adInfo.start()
         val adIdInfo = adInfo.info.id
         Log.d("getAdvertisingId = ", adIdInfo.toString())
-        Hawk.put(MAIN_ID, adIdInfo)
+        sharedMainId.edit().putString(MAIN_ID,adIdInfo).apply()
     }
+
+
+    val conversionDataListener = object : AppsFlyerConversionListener {
+        override fun onConversionDataSuccess(data: MutableMap<String, Any>?) {
+            val dataGotten = data?.get("campaign").toString()
+            sharedNaming.edit().putString(C1,dataGotten).apply()
+        }
+
+        override fun onConversionDataFail(p0: String?) {
+            Log.e("dev_test", "error getting conversion data: $p0" );
+        }
+
+        override fun onAppOpenAttribution(p0: MutableMap<String, String>?) {
+
+        }
+
+        override fun onAttributionFailure(p0: String?) {
+        }
+    }
+
 
 
     private fun networkJob(){
@@ -74,10 +106,8 @@ class MainActivity : AppCompatActivity() {
                 linkView = it.body()?.view
                 Log.d("Data", "getDataDev: $linkView")
                 appsChecker = it.body()?.appsChecker
-                Hawk.put(appsCheck, appsChecker)
-                Hawk.put(link, linkView)
-                Log.d("Data in Hawk", "getDataDev: ${Hawk.get(link, "null")}")
-                Log.d("Data in Hawk", "getDataDev: ${Hawk.get(appsCheck, "null")}")
+                sharedAppsCheck.edit().putString(appsCheck,appsChecker).apply()
+                 sharedlink.edit().putString(link,linkView).apply()
                 retroData = it.body()?.geo
 
                 countriesPool = retroData.toString()
@@ -93,9 +123,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun checker() {
            lifecycleScope.launch(Dispatchers.IO) {
-               val appsCh = Hawk.get(appsCheck, "null")
-               var naming: String? = Hawk.get(C1)
-               val deeplink: String? = Hawk.get(DEEPL, "null")
+               val appsCh = sharedAppsCheck.getString(appsCheck,"null")
+               var naming: String? = sharedNaming.getString(C1,"null")
+               val deeplink: String? = sharedDeep.getString(DEEPL,"null")
                Log.d("CountryPool", countriesPool)
                Log.d("CountryCode", countryCode)
                getAdId()
@@ -124,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                                        finish()
                                }
                            } else {
-                               naming = Hawk.get(C1)
+                               naming = sharedNaming.getString(C1,"null")
                                Log.d("Apps Checker", "naming: ${naming}")
                            }
                        },0, 2, TimeUnit.SECONDS)

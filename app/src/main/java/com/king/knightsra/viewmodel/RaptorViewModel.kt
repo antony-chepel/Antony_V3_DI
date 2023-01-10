@@ -1,16 +1,16 @@
 package com.king.knightsra.viewmodel
 
+import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.*
-import com.appsflyer.AppsFlyerConversionListener
+
 import com.facebook.applinks.AppLinkData
-import com.king.knightsra.constans.ConstanceAppClass.C1
+
 import com.king.knightsra.constans.ConstanceAppClass.DEEPL
 import com.king.knightsra.data.CountryCodeJS
 import com.king.knightsra.data.GeoDev
 import com.king.knightsra.repo.Repository
-import com.orhanobut.hawk.Hawk
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -23,23 +23,6 @@ class RaptorViewModel @Inject constructor(private val repository: Repository) : 
 
 
 
-    val conversionDataListener = object : AppsFlyerConversionListener {
-        override fun onConversionDataSuccess(data: MutableMap<String, Any>?) {
-            val dataGotten = data?.get("campaign").toString()
-            Hawk.put(C1, dataGotten)
-        }
-
-        override fun onConversionDataFail(p0: String?) {
-            Log.e("dev_test", "error getting conversion data: $p0" );
-        }
-
-        override fun onAppOpenAttribution(p0: MutableMap<String, String>?) {
-
-        }
-
-        override fun onAttributionFailure(p0: String?) {
-        }
-    }
 
 
 
@@ -65,7 +48,8 @@ class RaptorViewModel @Inject constructor(private val repository: Repository) : 
         ) { appLinkData: AppLinkData? ->
             appLinkData?.let {
                 val params = appLinkData.targetUri.host.toString()
-                Hawk.put(DEEPL, params)
+                 val sharedDeepl = context.getSharedPreferences(DEEPL,Application.MODE_PRIVATE)
+                sharedDeepl.edit().putString(DEEPL,params).apply()
             }
             if (appLinkData == null) {
 

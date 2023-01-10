@@ -34,9 +34,3 @@
 #Onesignal
 -dontwarn com.onesignal.**
 -keep class com.onesignal.ActivityLifecycleListenerCompat** {*;}
-
-#Hawk
--keepclassmembers @com.facebook.crypto.proguard.annotations.KeepGettersAndSetters class * {
-  void set*(***);
-  *** get*();
-}
